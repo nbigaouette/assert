@@ -1,0 +1,256 @@
+#################################################################
+# Generic makefile
+# Nicolas Bigaouette, July 2008
+#################################################################
+
+host=$(shell uname -n)
+arch=$(shell uname -m)
+os=$(shell uname)
+whoami = "whoami"
+ifeq ($(os),SunOS)
+    GNU = g
+    ifeq ($(wildcard /usr/ucb/whoami),/usr/ucb/whoami)
+        user=$(shell /usr/ucb/whoami)
+    endif
+    ifeq ($(wildcard /usr/gnu/bin/whoami),/usr/gnu/bin/whoami)
+        user=$(shell /usr/gnu/bin/whoami)
+    endif
+endif
+user=$(shell $(whoami) )
+PWD=$(shell pwd)
+comma:= ,
+column:= :
+empty:=
+space:= $(empty) $(empty)
+
+build_dir        = build
+
+HPCVL_MACHINES   = sflogin xenakis
+SHARCNET_MACHINES= bul narwhal wha hnd bal
+
+#################################################################
+# Force printing of help if just "make" is called
+include makefiles/Makefile.help
+
+#################################################################
+# Call "make sharcnet" for building SHARCNET
+ifneq ($(filter sharcnet, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.sharcnet
+endif
+#################################################################
+# Call "make gcc" for building using GCC (gcc or g++)
+ifneq ($(filter gcc, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.gcc
+endif
+#################################################################
+# Call "make gcc" for building using LLVM's Clang (clang or clang++)
+ifneq ($(filter clang, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.clang
+endif
+#################################################################
+# Call "make intel" for building using icc (Intel's C compiler)
+ifneq ($(filter intel, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.intel
+endif
+#################################################################
+# Call "make pgi" for building using pgcc (Portland Group's compiler)
+ifneq ($(filter pgi, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.pgi
+endif
+#################################################################
+# Call "make pathscale" for building using pathCC (Pathscale's compiler)
+ifneq ($(filter pathscale, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.pathscale
+endif
+#################################################################
+# Call "make sun" for building using sunCC (Sun Studio 12)
+ifneq ($(filter sun, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.sunstudio
+endif
+
+#################################################################
+# Call "make ds" to include debug symbols (-g)
+ifneq ($(filter ds, $(MAKECMDGOALS) ),)
+    CFLAGS      += -g
+endif
+#################################################################
+# Call "make mpi" for MPI compilation
+ifneq ($(filter mpi, $(MAKECMDGOALS) ),)
+    CFLAGS      += -DPARALLEL_MPI
+ifeq ($(filter pathscale, $(MAKECMDGOALS) ),)
+    CPP         := $(MPILOC)mpiCC
+    CC          := $(MPILOC)mpicc
+    ifeq ($(host)),cerberus)
+        CFLAGS  += -DMP_Lite -I$(HOME)/usr/include/
+        LDFLAGS += $(HOME)/usr/lib/libmplite.a
+    endif
+endif
+endif
+#################################################################
+# Call "make omp" for OpenMP compilation
+ifneq ($(filter omp, $(MAKECMDGOALS) ),)
+    CFLAGS      += -DPARALLEL_OMP
+    CFLAGS      += $(OMP_CFLAGS)
+    LDFLAGS     += $(OMP_LDFLAGS)
+endif
+#################################################################
+
+COMPILER    := $(CC)
+ifeq ($(LANGUAGE),CPP)
+COMPILER    := $(CPP)
+endif
+LD          := $(COMPILER)
+
+VPATH            = $(subst $(space),$(column),$(SRCDIRS) )
+# SOURCES            = $(sort $(subst src/,,$(foreach DIR,$(SRCDIRS) .,$(wildcard $(DIR)/*.$(SRCEXT) ) ) ) )
+SOURCES          = $(subst $(SRCDIRS)/,,$(foreach DIR,$(SRCDIRS) .,$(wildcard $(DIR)/*.$(SRCEXT) ) ) )
+NAMES            = $(subst .$(SRCEXT),,$(SOURCES) )
+BASENAMES        = $(notdir $(NAMES) )
+OBJ              = $(addprefix $(build_dir)/,$(addsuffix .o, $(BASENAMES) ) )
+
+INCLUDES         = $(addprefix -I./, $(SRCDIRS) )
+LDFLAGS         += -L./$(build_dir)
+
+
+#################################################################
+# Tools
+RM               = rm -f
+CONSOLE          = xterm -hold -e
+#CONSOLE          = konsole --vt_sz 73x41 --noclose -e
+#CONSOLE          = konsole --vt_sz 73x41 --noclose -e
+#CONSOLE            = konsole --noclose -e
+DEBUGGER         = gdb
+VALGRIND         = valgrind
+MEMCHECK         = $(VALGRIND) --tool=memcheck --leak-check=full --show-reachable=yes
+CACHEGRIND       = $(VALGRIND) --tool=callgrind
+ifeq ($(NP),)
+ifneq ($(np),)
+NP=$(np)
+endif
+endif
+#################################################################
+
+LINK_PREFERED    = shared
+# Link statically on clusters
+ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
+LINK_PREFERED    = static
+endif
+
+.PHONY: a b l all
+a: all
+b: all
+l: all
+all: $(BIN)
+
+.PHONY: o
+o: $(OBJ)
+
+# Linking
+$(BIN): $(OBJ)
+	$(LD) $(OBJ) -o $(BIN) $(LDFLAGS)
+
+# Compilation of source files, depends on ALL headers
+$(build_dir)/%.o : %.$(SRCEXT) $(foreach DIR,$(SRCDIRS) .,$(wildcard $(DIR)/*.$(HEADEXT)))
+	$(COMPILER) $(strip $(CFLAGS) $(INCLUDES)) -c $< -o $@
+
+
+# Clean the project
+.PHONY: c clean
+c: clean
+clean: clean_bin clean_obj
+
+# Clean the project of the executable
+.PHONY: cb clean_bin
+cb: clean_bin
+clean_bin:
+	$(RM) $(BIN)
+
+# Clean the project of object files
+.PHONY: co clean_obj
+co: clean_obj
+clean_obj:
+	$(RM) build/*
+#   find . -iname "*.o" -exec $(RM) {} \;
+#   find . -iname "*.a" -exec $(RM) {} \;
+#   find . -iname "*.so" -exec $(RM) {} \;
+#   find . -iname "*.gcda" -exec $(RM) {} \;
+#   find . -iname "*.gcno" -exec $(RM) {} \;
+#   find . -iname "*.il" -exec $(RM) {} \;
+
+# Clean the project of documentation files
+.PHONY: clean_doc
+clean_doc:
+	rm -fr doc/*
+
+.PHONY: cd clean_dat
+cd: clean_dat
+clean_dat:
+	rm -fr *.dat output/*
+
+# Clean the project of everything
+.PHONY: d distclean
+d: distclean
+distclean: clean_bin clean_obj clean_data clean_doc
+
+# Run the program
+.PHONY: r run
+r: run
+run: $(BIN)
+	./$(BIN)
+
+# Run the parallel program
+.PHONY: p rp pr
+rp: p
+pr: p
+p:
+	mpirun -np $(NP) ./$(BIN)
+pk:
+	mpirun -np $(NP) $(CONSOLE) ./$(BIN)
+pkd:
+	mpirun -np $(NP) $(CONSOLE) $(DEBUGGER) ./$(BIN)
+pkv:
+	mpirun -np $(NP) $(CONSOLE) $(VALGRIND) ./$(BIN)
+
+# Count the number of lines of project
+.PHONY: count
+count:
+	wc -l $(addsuffix /*, $(SRCDIRS))
+
+# Build doxygen documentation
+.PHONY: doxygen doc
+doc: doxygen
+doxygen:
+	doxygen
+
+# Run through valgrind for errors
+.PHONY: valgrind v vv
+v: valgrind
+valgrind: $(BIN)
+	$(MEMCHECK) ./$(BIN)
+vv: $(BIN)
+	$(MEMCHECK) --verbose ./$(BIN)
+.PHONY: cachegrind cg
+cg: cachegrind
+cachegrind: $(BIN)
+	$(CACHEGRIND) ./$(BIN)
+
+# Run through gdb for debugging
+.PHONY: g gdb
+g: gdb
+gdb: $(BIN)
+	gdb --quiet $(BIN)
+
+#################################################################
+# Target depending on the binary. Necessary for the previous
+# lines "ifneq ($(filter ..." to work.
+.PHONY: mpi omp optimized dg
+mpi: force
+omp: force
+optimized: force
+dg: force
+
+# Force target
+.PHONY: force
+force: ;
+
+############ End of file ########################################

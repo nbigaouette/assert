@@ -1,0 +1,65 @@
+#################################################################
+# Makefile for compilation with Intel's compiler
+# Default: debug  & serial
+DESTDIRCOMPILER := intel
+CC              := icc
+CPP             := icpc
+CFLAGS          := -O0 -g -DYDEBUG -Wall -w2 -wn1
+CFLAGS          += -wd981   # remark #981: operands are evaluated in unspecified order
+CFLAGS          += -wd1419  # remark #1419: external declaration in primary source file
+CFLAGS          += -wd869   # remark #869: parameter "???" was never referenced
+CFLAGS          += -wd1418  # remark #1418: external function definition with no prior declaration
+CFLAGS          += -wd383   # remark #383: value copied to temporary, reference to temporary used
+
+
+RPATH           := -Wl,-rpath,
+
+LibMath         := -lm
+LDFLAGS         :=
+OMP_CFLAGS      := -openmp
+OMP_LDFLAGS     := -openmp
+
+#################################################################
+# Call "make optimized" for optimized compilation
+ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
+    CFLAGS      := -O3 -w1 -DNDEBUG
+    LDFLAGS     := -O3 -w1
+    # Building a library with IPO won't work, only for binaries
+    # (-fast includes -ipo)
+    #CFLAGS      += -ipo -fast
+    #LDFLAGS     += -ipo -fast
+endif
+#################################################################
+# MPI location
+MPILOC          := /usr/lib/intel/openmpi/bin/
+
+#################################################################
+# FLAGS that should appear, whatever the compilation options
+CFLAGS          += -m64
+LDFLAGS         += -m64
+
+# Create "position independant" code on x86_64
+ifeq ($(arch),x86_64)
+    CFLAGS      += -fPIC
+    LDFLAGS     += -fPIC
+endif
+
+GCC_MAJOR    := $(shell $(CXX) -dumpversion 2>&1 | cut -d'.' -f1)
+GCC_MINOR    := $(shell $(CXX) -dumpversion 2>&1 | cut -d'.' -f2)
+ifeq ($(GCC_MINOR),5)
+    CFLAGS          += -gcc-name=/opt/gcc34/bin/gcc -gxx-name=/opt/gcc34/bin/g++
+endif
+
+#################################################################
+# Flags to build a shared object (library) should be the same
+# as CFLAGS plus -shared
+LIB_OPTIONS     := -shared $(CFLAGS)
+
+# Detect if compilation for library
+ifneq ($(LIB),)
+intel: force
+else
+intel: $(BIN)
+endif
+
+############ End of file ########################################

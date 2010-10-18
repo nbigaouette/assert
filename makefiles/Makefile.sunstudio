@@ -1,0 +1,117 @@
+#################################################################
+# Makefile for building with Sun Studio
+#     make sun studio7      Compilation with Sun Studio 7
+#     make sun studio11     Compilation with Sun Studio 11
+#     make sun studio12     Compilation with Sun Studio 12
+#
+
+CCPATH           =
+
+ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
+    ### If on HPCVL...
+
+    ### Which Sun Studio to use
+    ifneq ($(filter studio7, $(MAKECMDGOALS) ),)
+        CCPATH          := /opt/studio7/SUNWspro/bin/
+    endif
+    ifneq ($(filter studio11, $(MAKECMDGOALS) ),)
+        CCPATH          := /opt/studio11/SUNWspro/bin/
+    endif
+    ifneq ($(filter studio12, $(MAKECMDGOALS) ),)
+        CCPATH          := /opt/studio12/SUNWspro/bin/
+    endif
+
+    ifeq ($(CCPATH),)
+        $(error "Please specifiy which Sun Studio compiler to use (studio7, studio11 of studio12)")
+    endif
+
+endif # ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
+
+DESTDIRCOMPILER := sun
+CC              := $(CCPATH)suncc
+CPP             := $(CCPATH)sunCC
+CFLAGS          := -O0 -g -DYDEBUG
+
+
+
+RPATH           := -Rpath,
+LibMath         := -lmopt
+LDFLAGS         := $(RPATH)/opt/sunstudio12/rtlibs/amd64
+OMP_CFLAGS      := -xopenmp
+OMP_LDFLAGS     := -xopenmp
+
+ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
+    ### If on HPCVL...
+    ifeq ($(host),xenakis)
+        HPC_version := 7.1
+    else
+        HPC_version := 8.2/sun
+    endif
+    MPILOC      := /opt/SUNWhpc/HPC$(HPC_version)/bin/
+endif
+
+#################################################################
+# Call "make optimized" for optimized compilation
+ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
+    #CFLAGS      := -fast -DNDEBUG
+    CFLAGS      := -O3 -DNDEBUG
+    LDFLAGS     := -O3 -DNDEBUG
+
+    #### More optimization for specific HPCVL machines:
+    #### Sun Fire (See http://www.hpcvl.org/hardware/hpc-env-storage-sun-fire-cluster.html)
+    #CFLAGS      += -fast
+    ### Victoria Falls (See http://www.hpcvl.org/hardware/victoria-falls.html)
+    #CFLAGS      += -xtarget=ultraT2 -xcache=8/16/4:4096/64/16
+    ### M90000 (See http://www.hpcvl.org/hardware/m9000.html)
+    #CFLAGS      += -xtarget=sparc64vii -xcache=64/64/2:6144/256/12 -xarch=sparcima
+    #CFLAGS      += -xarch=sparcfmaf -fma=fused # For Fused Multiplication/Addition" (FMA)
+    ### Xenakis
+    #CFLAGS      += -fast
+endif
+
+#################################################################
+# FLAGS that should appear, whatever the compilation options
+CFLAGS          += -m64
+LDFLAGS         += -m64
+
+# STLPort should be forced on stupid non-standard Sun Studio
+# Note that ALL code should be compiled with this: the
+# library AND the treecode/MD
+# http://docs.sun.com/app/docs/doc/819-5267/bkakg?a=view
+#CFLAGS          += -library=stlport4
+#LDFLAGS         += -library=stlport4
+
+# Create "position independant" code on x86_64 or SPARC
+ifeq ($(arch),x86_64)
+    CFLAGS      += -Kpic
+    LDFLAGS     += -Kpic
+endif
+ifeq ($(arch),sun4u)
+    # Should be faster:
+    #CFLAGS      += -xcode=pic13
+    #LDFLAGS     += -xcode=pic13
+
+    # But if ld complains with:
+    # ld: fatal: too many symbols require `small' PIC references:
+    #    have 1213, maximum 1024 -- recompile some modules -K PIC.
+    CFLAGS      += -xcode=pic32
+    LDFLAGS     += -xcode=pic32
+endif
+
+#################################################################
+# Flags to build a shared object (library) should be the same
+# as CFLAGS plus -G
+LIB_OPTIONS     := -G $(CFLAGS)
+
+# Detect if compilation for library
+ifneq ($(LIB),)
+sun: force
+else
+sun: $(BIN)
+endif
+
+studio7: force
+studio11: force
+studio12: force
+
+############ End of file ########################################

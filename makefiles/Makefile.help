@@ -1,0 +1,63 @@
+#################################################################
+# Help makefile
+#################################################################
+
+h: help
+help: force
+	@echo "Usage (debug build by default):"
+	@echo ""
+	@echo "make [compiler set] [options]"
+	@echo "Possible compilers:"
+	@echo "    gcc          GNU's GCC compiler set"
+	@echo "    intel        Intel's ICC compiler set"
+	@echo "    pgi          Portland Group compiler set"
+	@echo "    sun studioX  Sun's Studio compiler set (where X is 7,11 or 12)"
+	@echo "Possible compilation options:"
+	@echo "    shared       Build shared library"
+	@echo "    static       Build static library"
+	@echo "    optimized    Optimized build"
+	@echo "    mpi          MPI"
+	@echo "    omp          OpenMP"
+	@echo "    ds           Include debugging symbols"
+	@echo "    prof         Profiling (gcc only)"
+	@echo "    cov          Coverage (gcc only)"
+	@echo "    test_static  Test static build"
+	@echo "    test_shared  Test shared build"
+	@echo "    install      Install to $DESTDIR (default to /usr)"
+	@echo ""
+	@echo "Other possible targets:"
+	@echo "    Please type 'make details' for details"
+	@echo ""
+	@echo "See GNU Make:"
+	@echo "http://www.gnu.org/software/make/manual/make.html"
+	@echo ""
+	@echo "Example:"
+	@echo "> make clean gcc optimized shared static install"
+	@echo "This will clean, compile using gcc and optimized flags"
+	@echo "the shared and static libraries. Finally it will install"
+
+details: help
+	@echo ""
+	@echo "Other possible options (targets):"
+	@echo "    a,b,l,all    Build the executable ($(BIN))"
+	@echo "    o            Build objects"
+	@echo "    c,clean      Clean (delete) built objects"
+	@echo "    cb,clean_bin Clean the binary executable"
+	@echo "    co,clean_obj Clean objects"
+	@echo "    clean_doc    Clean the doxygen documentation"
+	@echo "    cd,clean_dat Clean the output data folder"
+	@echo "    d,distclean  Clean of everything"
+	@echo "    r,run        Run the program ($(BIN))"
+	@echo "    count        Count the number of lines of source code"
+	@echo "    doxygen,doc  Built the doxygen documentation"
+	@echo "    v,valgrind   Run through valgrind"
+	@echo "    vv           Run through valgrind (verbose)"
+	@echo "    cg,cachegrind  Run through cachegrind"
+	@echo "    g,gdb        Run through gdb for debugging"
+	@echo ""
+	@echo ""
+	@echo "Nicolas Bigaouette (nbigaouette@gmail.com)"
+	@echo ""
+
+
+############ End of file ########################################

@@ -1,0 +1,71 @@
+#################################################################
+# Makefile for building using GCC (gcc or g++)
+# Default: debug  & serial
+
+ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
+COMP_LOC         = /opt/csw/gcc4/bin/
+endif
+
+DESTDIRCOMPILER := gcc
+CC               = $(COMP_LOC)gcc
+CPP              = $(COMP_LOC)g++
+CFLAGS           = -O0 -g -DYDEBUG -Wno-write-strings
+CFLAGS          += -Wall -Wfatal-errors
+
+RPATH           := -Wl,-rpath,
+
+LibMath         := -lm
+LDFLAGS         :=
+OMP_CFLAGS       = -fopenmp
+OMP_LDFLAGS      = -fopenmp
+
+#################################################################
+# Call "make optimized" for optimized compilation
+ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
+    CFLAGS      := -O3 -Wno-write-strings -march=native -DNDEBUG
+    # Needed for fast dSFMT pseudo-random number generator
+    CFLAGS      += -msse2 -DHAVE_SSE2
+    CFLAGS      += -ftree-vectorizer-verbose=1
+endif
+#################################################################
+# Call "make prof" for profiling
+ifneq ($(filter prof, $(MAKECMDGOALS) ),)
+    CFLAGS      += -pg
+    LDFLAGS     += -pg
+endif
+#################################################################
+# Call "make cov" for coverage
+ifneq ($(filter cov, $(MAKECMDGOALS) ),)
+    CFLAGS      += -fprofile-arcs -ftest-coverage
+    LDFLAGS     += -fprofile-arcs -ftest-coverage
+endif
+
+#################################################################
+# MPI location
+MPILOC          :=
+
+# Create "position independant" code on x86_64 or SPARC
+ifeq ($(arch),x86_64)
+    CFLAGS      += -fPIC
+    LDFLAGS     += -fPIC
+endif
+ifeq ($(arch),sun4u)
+    CFLAGS      += -fPIC
+    LDFLAGS     += -fPIC
+endif
+
+#################################################################
+# Flags to build a shared object (library) should be the same
+# as CFLAGS plus -shared
+LIB_OPTIONS     := -shared $(CFLAGS)
+
+# Detect if compilation for library
+ifneq ($(LIB),)
+gcc: force
+else
+gcc: $(BIN)
+endif
+prof: gcc
+cov: gcc
+
+############ End of file ########################################

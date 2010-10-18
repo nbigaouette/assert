@@ -1,0 +1,107 @@
+#################################################################
+# Makefile for building using pgCC (Portland Group's compiler)
+# Default: debug  & serial
+
+CC              := cc
+CPP             := CC
+CFLAGS          := -O0 -g -DYDEBUG
+
+RPATH           := -R
+LibMath         := -lm
+LDFLAGS         :=
+OMP_CFLAGS      := -mp
+OMP_LDFLAGS     := -mp
+
+CFLAGS          += -I$(HOME)/usr/include
+
+#################################################################
+# Call "make pathscale" to force pathscale compilation
+ifneq ($(filter pathscale, $(MAKECMDGOALS) ),)
+    DESTDIRCOMPILER := pathscale
+    CPP         += -psc
+    CC          += -psc
+    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+endif
+#################################################################
+# Call "make pgi" to force pgi compilation
+ifneq ($(filter pgi, $(MAKECMDGOALS) ),)
+    DESTDIRCOMPILER := pgi
+    CPP         += -pgi
+    CC          += -pgi
+    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+endif
+#################################################################
+# Call "make intel" to force intel compilation
+ifneq ($(filter intel, $(MAKECMDGOALS) ),)
+    DESTDIRCOMPILER := intel
+    CPP         += -intel
+    CC          += -intel
+    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+endif
+#################################################################
+# Call "make gcc" to force gcc compilation
+ifneq ($(filter gcc, $(MAKECMDGOALS) ),)
+    DESTDIRCOMPILER := gcc
+    CPP         += -gcc
+    CC          += -gcc
+    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+endif
+#################################################################
+# Call "make dec" to force dec compilation
+ifneq ($(filter dec, $(MAKECMDGOALS) ),)
+    DESTDIRCOMPILER := dec
+    CPP         += -dec
+    CC          += -dec
+    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+endif
+
+#################################################################
+# Call "make optimized" for optimized compilation
+ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
+    CFLAGS      := -O3 -fast -fastsse -DNDEBUG
+endif
+
+
+
+#################################################################
+# Call "make omp" for OpenMP compilation
+ifneq ($(filter omp, $(MAKECMDGOALS) ),)
+    OMP_CFLAGS  := -openmp
+endif
+#################################################################
+# Call "make mpi" for MPI compilation
+ifneq ($(filter omp, $(MAKECMDGOALS) ),)
+    OMP_CFLAGS  := -mpi
+endif
+
+#################################################################
+# MPI location
+MPILOC          := /usr/lib/$(DESTDIRCOMPILER)/openmpi/bin/
+
+#CFLAGS          += -I/opt/pgi-workstation/linux86-64/7.1-6/include -I /opt/pgi-workstation/linux86-64/7.1-6/include/CC
+#CFLAGS          += -I/home/nbiga058/usr/include
+
+# Create "position independant" code on x86_64
+ifeq ($(arch),x86_64)
+    CFLAGS      += -fPIC
+    LDFLAGS     += -fPIC
+endif
+
+#################################################################
+# Flags to build a shared object (library) should be the same
+# as CFLAGS plus -shared
+LIB_OPTIONS     := -shared $(CFLAGS)
+
+# Detect if compilation for library
+ifneq ($(LIB),)
+sharcnet: force
+else
+sharcnet: $(BIN)
+endif
+
+pathscale: force
+pgi: force
+gcc: force
+intel: force
+dec: force
+############ End of file ########################################

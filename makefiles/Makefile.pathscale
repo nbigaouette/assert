@@ -1,0 +1,66 @@
+#################################################################
+# Makefile for building using pathCC (Pathscale's compiler)
+# Default: debug  & serial
+DESTDIRCOMPILER := pathscale
+CC              := pathcc
+CPP             := pathCC
+CFLAGS          := -O0 -g -Wall -fullwarn -DYDEBUG
+
+
+RPATH           := -Wl,-rpath=
+LibMath         := -lm
+LDFLAGS         :=
+OMP_CFLAGS      := -mp
+OMP_LDFLAGS     := -mp
+
+#################################################################
+# Call "make optimized" for optimized compilation
+ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
+    #CFLAGS      := -O3
+    #CFLAGS      += -OPT:Ofast -fno-math-errno -TENV:simd_zmask=OFF -TENV:simd_imask=OFF -TENV:simd_omask=OFF -DNDEBUG
+    # Obtained using "c++ -v" on sharcnet (whale)
+    CFLAGS      := -TENV:simd_zmask=OFF -TENV:simd_imask=OFF -TENV:simd_omask=OFF -O3 -OPT:Ofast -fno-math-errno
+    CFLAGS      += -ipa
+    CFLAGS      += -DNDEBUG
+    LDFLAGS     := $(CFLAGS)
+endif
+#################################################################
+# Call "make prof" for profiling
+ifneq ($(filter prof, $(MAKECMDGOALS) ),)
+    CFLAGS      += -pg
+    LDFLAGS     += -pg
+endif
+#################################################################
+# Call "make mpi" for MPI compilation
+ifneq ($(filter mpi, $(MAKECMDGOALS) ),)
+ifeq ($(host),bul124)
+#ifeq ($(host),nar316)
+    CC          := pathcc
+    CPP         := pathCC
+    CFLAGS      += -I/opt/hpmpi/include
+    LDFLAGS     += -L/opt/hpmpi/lib/linux_amd64 -lmpiCC -lhpmpio -lhpmpi -L/opt/hpmpi/lib/linux_amd64 -lmpi
+endif
+endif
+#################################################################
+# MPI location
+MPILOC          := /usr/lib/$(DESTDIRCOMPILER)/openmpi/bin/
+
+# Create "position independant" code on x86_64
+ifeq ($(arch),x86_64)
+    CFLAGS      += -fPIC
+    LDFLAGS     += -fPIC
+endif
+
+#################################################################
+# Flags to build a shared object (library) should be the same
+# as CFLAGS plus -shared
+LIB_OPTIONS     := -shared $(CFLAGS)
+
+# Detect if compilation for library
+ifneq ($(LIB),)
+pathscale: force
+else
+pathscale: $(BIN)
+endif
+
+############ End of file ########################################

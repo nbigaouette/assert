@@ -1,0 +1,75 @@
+#################################################################
+# Makefile for building using LLVM's Clang (clang or clang++)
+# LLVM and Clang are still work in progress.
+# See http://clang.llvm.org/docs/UsersManual.html
+# Default: debug  & serial
+
+DESTDIRCOMPILER := clang
+CC               = $(COMP_LOC)clang
+CPP              = $(COMP_LOC)clang++
+CFLAGS           = -O0 -g -DYDEBUG
+CFLAGS          += -Wall -Wfatal-errors
+CFLAGS          += -std=c++98
+CFLAGS          += -pedantic
+CFLAGS          += -Wall -Wextra
+CFLAGS          += -Wformat=2 -Wno-format-extra-args -Wformat-security -Wformat-nonliteral
+CFLAGS          += -Wuninitialized -Winit-self
+CFLAGS          += -Wmissing-include-dirs -Wfloat-equal -Wshadow -Winline
+# CFLAGS          += -Wconversion
+CFLAGS          += -Wunreachable-code
+# CFLAGS          += -Wno-unused-variable  # Disable: "warning: unused variable [...]"
+CFLAGS          += -Wno-unused-parameter # Disable: "warning: unused parameter [...]"
+CFLAGS          += -Wno-unknown-pragmas
+#
+# RPATH           := -Wl,-rpath,
+
+# LibMath         := -lm
+# LDFLAGS         :=
+OMP_CFLAGS       = -fopenmp
+OMP_LDFLAGS      = -fopenmp
+
+#################################################################
+# Call "make optimized" for optimized compilation
+ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
+    CFLAGS      := -O3 -march=native -DNDEBUG
+endif
+#################################################################
+# LLVM's Clang does not support OpenMP (yet, 2010/04/28)
+ifneq ($(filter omp, $(MAKECMDGOALS) ),)
+    $(error LLVM's Clang does not support OpenMP (yet, 2010/04/28))
+endif
+
+#################################################################
+# MPI location
+MPILOC          :=
+
+# Create "position independant" code on x86_64 or SPARC
+ifeq ($(arch),x86_64)
+    CFLAGS      += -fPIC
+    LDFLAGS     += -fPIC
+endif
+ifeq ($(arch),sun4u)
+    CFLAGS      += -fPIC
+    LDFLAGS     += -fPIC
+endif
+
+#################################################################
+# Flags to build a shared object (library) should be the same
+# as CFLAGS plus -shared
+LIB_OPTIONS     := -shared $(CFLAGS)
+
+# http://llvm.org/bugs/show_bug.cgi?id=7069
+GCC_MAJOR       := $(shell gcc -dumpversion | cut -d'.' -f1)
+GCC_MINOR       := $(shell gcc -dumpversion | cut -d'.' -f2)
+GCC_REV         := $(shell gcc -dumpversion | cut -d'.' -f3)
+ifeq ($(GCC_MAJOR).$(GCC_MINOR),4.5)
+GCC34_LOC       := /opt/gcc34
+CFLAGS          += -nostdinc++ -I$(GCC34_LOC)/include/c++/3.4.6 -I$(GCC34_LOC)/include/c++/3.4.6/x86_64-unknown-linux-gnu
+endif
+
+
+clang: force
+prof: clang
+cov: clang
+
+############ End of file ########################################
