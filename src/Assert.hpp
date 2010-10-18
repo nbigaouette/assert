@@ -2,6 +2,7 @@
 #define INC_ASSERT_hpp
 
 #include <cstdlib>
+#include <cmath>
 
 #include <StdCout.hpp>
 
@@ -41,20 +42,19 @@
 template <class T>
 inline void Assert_isinf_isnan(T value)
 {
-#ifndef __SUNPRO_CC
-//     if (isinf(value))
-//     {
-//         std_cout << "value is inf!!! value = " << value << "\n";
-//         std_cout << "Aborting\n";
-//     }
-    assert(!isinf(value));
-#endif // #ifndef __SUNPRO_CC
-//     if (isnan(value))
-//     {
-//         std_cout << "value is NaN!!! value = " << value << "\n";
-//         std_cout << "Aborting\n";
-//     }
-    assert(!isnan(value));
+    if (isinf(value))
+    {
+        std_cout << "value is inf!!! value = " << value << "\n";
+        std_cout << "Aborting\n";
+    }
+    assert(!std::isinf(value));
+
+    if (isnan(value))
+    {
+        std_cout << "value is NaN!!! value = " << value << "\n";
+        std_cout << "Aborting\n";
+    }
+    assert(!std::isnan(value));
 }
 
 #endif // INC_ASSERT_hpp
