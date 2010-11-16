@@ -39,6 +39,7 @@
 // #endif // #ifdef YDEBUG
 
 // **************************************************************
+/*
 template <class T>
 inline void Assert_isinf_isnan(T value)
 {
@@ -55,6 +56,23 @@ inline void Assert_isinf_isnan(T value)
         std_cout << "Aborting\n";
     }
     assert(!std::isnan(value));
+}
+*/
+#define Assert_isinf_isnan(value)                                   \
+{                                                                   \
+    if (std::isinf((value)))                                        \
+    {                                                               \
+        std_cout << "value is inf!!! value = " << (value) << "\n";  \
+        std_cout << "Aborting\n";                                   \
+    }                                                               \
+    assert(!std::isinf((value)));                                   \
+                                                                    \
+    if (std::isnan((value)))                                        \
+    {                                                               \
+        std_cout << "value is NaN!!! value = " << (value) << "\n";  \
+        std_cout << "Aborting\n";                                   \
+    }                                                               \
+    assert(!std::isnan((value)));                                   \
 }
 
 #endif // INC_ASSERT_hpp
