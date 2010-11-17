@@ -6,10 +6,17 @@
 
 #include <StdCout.hpp>
 
+#ifndef DEBUGP
 #define DEBUGP(x)  std_cout << __FILE__ << ":" << __LINE__ << ":\n    " << x;
+#endif // #ifndef DEBUGP
+
 // Quote something, usefull to quote a macro's value
+#ifndef _QUOTEME
 #define _QUOTEME(x) #x
+#endif // #ifndef _QUOTEME
+#ifndef QUOTEME
 #define QUOTEME(x) _QUOTEME(x)
+#endif // #ifndef QUOTEME
 
 // **************************************************************
 // http://stackoverflow.com/questions/389180/assert-and-ndebug
