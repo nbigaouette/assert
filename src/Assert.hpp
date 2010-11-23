@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <cmath>
+#include <limits>  // http://www.cplusplus.com/reference/std/limits/numeric_limits/
 
 #include <StdCout.hpp>
 
@@ -65,6 +66,19 @@ inline void Assert_isinf_isnan(T value)
     assert(!std::isnan(value));
 }
 */
+#ifdef __INTEL_COMPILER
+#define Assert_isinf_isnan(value)                                   \
+{                                                                   \
+    if ((value) != (value))                                         \
+    {                                                               \
+        std_cout << "value is NaN!!! value = " << (value) << "\n";  \
+        std_cout << "Aborting\n";                                   \
+        abort();                                                    \
+    }                                                               \
+    assert((value) == (value));                                     \
+    /* FIXME: Add a isinf() equivalent */                           \
+}
+#else // #ifdef __INTEL_COMPILER
 #define Assert_isinf_isnan(value)                                   \
 {                                                                   \
     if (std::isinf((value)))                                        \
@@ -81,6 +95,7 @@ inline void Assert_isinf_isnan(T value)
     }                                                               \
     assert(!std::isnan((value)));                                   \
 }
+#endif // #ifdef __INTEL_COMPILER
 
 #endif // INC_ASSERT_hpp
 
