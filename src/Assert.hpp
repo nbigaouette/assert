@@ -70,6 +70,9 @@ inline void Assert_isinf_isnan(T value)
 #ifdef __INTEL_COMPILER
 #define Assert_isinf_isnan(value)                                   \
 {                                                                   \
+    /* Disable warning #1572: "floating-point equality and          \
+       inequality comparisons are unreliable" */                    \
+    __pragma(warning(disable:1572))                                 \
     if ((value) != (value))                                         \
     {                                                               \
         std_cout << "value is NaN!!! value = " << (value) << "\n";  \
