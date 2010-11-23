@@ -81,19 +81,6 @@ inline void Assert_isinf_isnan(T value)
 #else // #ifdef __INTEL_COMPILER
 #define Assert_isinf_isnan(value)                                   \
 {                                                                   \
-    if (std::isinf((value)))                                        \
-    {                                                               \
-        std_cout << "value is inf!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-    }                                                               \
-    assert(!std::isinf((value)));                                   \
-                                                                    \
-    if (std::isnan((value)))                                        \
-    {                                                               \
-        std_cout << "value is NaN!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-    }                                                               \
-    assert(!std::isnan((value)));                                   \
 }
 #endif // #ifdef __INTEL_COMPILER
 
