@@ -91,8 +91,8 @@ endif
 possible_host_HPCVL_match    := $(strip $(foreach possible_host, $(HPCVL_MACHINES),    $(findstring $(possible_host), $(host) ) ) )
 # Do specific stuff for different clusters
 ifneq ($(possible_host_HPCVL_match), )
-INSTALL := /usr/ucb/$(subst -D,,$(INSTALL) )
-INSTALL_EXEC := /usr/ucb/$(subst -D,,$(INSTALL_EXEC) )
+INSTALL := $(subst -D,,$(INSTALL) )
+INSTALL_EXEC := $(subst -D,,$(INSTALL_EXEC) )
 endif
 
 ### Add compiler to library directory, but only if not GCC
