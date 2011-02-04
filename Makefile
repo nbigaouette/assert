@@ -17,44 +17,6 @@ include makefiles/Makefile.rules
 
 LIB_OBJ          = $(OBJ)
 
-################################################################
-### StdCout library default location (home directory)
-LibName         := stdcout
-LibIncludes     := $(HOME)/usr/include
-ifeq ($(DESTDIRCOMPILER),gcc)
-LibLocation     := $(HOME)/usr/lib
-else
-LibLocation     := $(HOME)/usr/lib/$(DESTDIRCOMPILER)
-endif
-
-### Check if the location exist. If not, try the /usr directoy
-ifeq ($(wildcard $(LibLocation)/lib$(LibName).*),)
-LibIncludes     := /usr/include
-ifeq ($(DESTDIRCOMPILER),gcc)
-LibLocation     := /usr/lib
-else
-LibLocation     := /usr/lib/$(DESTDIRCOMPILER)
-endif
-endif
-
-### If library is not found, bail out!
-ifeq ($(wildcard $(LibLocation)/lib$(LibName).*),)
-$(error ERROR: $(LibName) could not be found in "$(LibLocation)"! Please install it from ssh://optimusprime.selfip.net/git/nicolas/$(LibName).git)
-endif
-
-# The following lines are needed else gnu make will many times the last library
-StdCout_Lib_CFLAGS      := -I$(LibIncludes)
-ifeq ($(LINK_PREFERED),shared)
-StdCout_Lib_LDFLAGS     := -L$(LibLocation) -l$(LibName) $(RPATH)$(LibLocation)
-else # static
-StdCout_Lib_LDFLAGS     := $(LibLocation)/lib$(LibName).a
-endif
-
-### Add library flags
-CFLAGS          += $(StdCout_Lib_CFLAGS)
-LDFLAGS         += $(StdCout_Lib_LDFLAGS)
-################################################################
-
 test:
 	# HEADERS_NOTESTING = $(HEADERS_NOTESTING)
 	# HEADERS_NOTESTING_NOSRC = $(HEADERS_NOTESTING_NOSRC)
