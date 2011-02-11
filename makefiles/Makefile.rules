@@ -148,10 +148,12 @@ endef
 # To use, include a similar line in the main Makefile:
 # $(eval $(call LDFLAGS_template,stdcout,StdCout.hpp),ssh://optimusprime.selfip.net/git/nicolas/stdcout.git)
 define LDFLAGS_template
-    $(1)_lib_home          := $(HOME)/usr/lib
-    $(1)_lib_home_name     := $(HOME)/usr/lib/$(1)
-    $(1)_lib_usr           := /usr/lib
-    $(1)_lib_usr_name      := /usr/lib/$(1)
+    usr_lib                := $(subst /gcc,,/usr/lib/$(DESTDIRCOMPILER))
+
+    $(1)_lib_home          := $(HOME)$$(usr_lib)
+    $(1)_lib_home_name     := $(HOME)$$(usr_lib)/$(1)
+    $(1)_lib_usr           := $$(usr_lib)
+    $(1)_lib_usr_name      := $$(usr_lib)/$(1)
 
     ifneq ($$(wildcard $$($(1)_lib_home)/lib$(1).so),)
         $(1)_LibDir := $$($(1)_lib_home)
