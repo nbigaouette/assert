@@ -77,6 +77,7 @@ inline void Assert_isinf_isnan(T value)
     {                                                               \
         std_cout << "value is NaN!!! value = " << (value) << "\n";  \
         std_cout << "Aborting\n";                                   \
+        std_cout << std::flush;                                     \
         abort();                                                    \
     }                                                               \
     assert((value) == (value));                                     \
@@ -90,6 +91,7 @@ inline void Assert_isinf_isnan(T value)
     {                                                               \
         std_cout << "value is NaN!!! value = " << (value) << "\n";  \
         std_cout << "Aborting\n";                                   \
+        std_cout << std::flush;                                     \
         abort();                                                    \
     }                                                               \
     assert((value) == (value));                                     \
@@ -102,6 +104,7 @@ inline void Assert_isinf_isnan(T value)
     {                                                               \
         std_cout << "value is inf!!! value = " << (value) << "\n";  \
         std_cout << "Aborting\n";                                   \
+        std_cout << std::flush;                                     \
     }                                                               \
     assert(!std::isinf((value)));                                   \
                                                                     \
@@ -109,6 +112,7 @@ inline void Assert_isinf_isnan(T value)
     {                                                               \
         std_cout << "value is NaN!!! value = " << (value) << "\n";  \
         std_cout << "Aborting\n";                                   \
+        std_cout << std::flush;                                     \
     }                                                               \
     assert(!std::isnan((value)));                                   \
 }
