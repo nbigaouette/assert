@@ -31,8 +31,8 @@ f:
 	$(MAKE) install $(filter-out f, $(MAKECMDGOALS) )
 
 ### Install #####################################################
-INSTALL          = $(GNU)install -m644 -D
-INSTALL_EXEC     = $(GNU)install -m755 -D
+INSTALL          = $(GNU)install -m644
+INSTALL_EXEC     = $(GNU)install -m755
 
 DEFAULT_DESTDIR := $(HOME)/usr
 ifeq ($(DESTDIR),)
@@ -76,6 +76,9 @@ TO_INSTALL       = install_headers
 .PHONY: install
 install: $(TO_INSTALL)
 
+$(DESTDIR)/include:
+	mkdir -p $(DESTDIR)/include
+
 .PHONY: install_headers install_headers_print install_headers_print_done
 ifeq ($(wildcard $(INSTALLED_HEADERS)),)
 install_headers_print: install_create_folders
@@ -89,7 +92,7 @@ install_headers_print:
 install_headers_print_done:
 endif
 install_headers: install_headers_print $(INSTALLED_HEADERS) install_headers_print_done
-$(DESTDIR)/include/%.$(HEADEXT): src/%.$(HEADEXT)
+$(DESTDIR)/include/%.$(HEADEXT): $(DESTDIR)/include src/%.$(HEADEXT)
 	$(SUDO) $(INSTALL) $< $@
 
 install_create_folders:
