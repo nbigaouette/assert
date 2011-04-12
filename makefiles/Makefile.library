@@ -1,0 +1,143 @@
+### Just build "full" and install
+.PHONY: f
+f:
+	$(MAKE) install $(filter-out f, $(MAKECMDGOALS) )
+
+.PHONY: shared lib_shared
+shared: lib_shared
+lib_shared: $(build_dir)/lib$(LIB).so
+$(build_dir)/lib$(LIB).so: $(LIB_OBJ)
+	############################################################
+	######## Building shared library... ########################
+	#
+	$(LD) $(LIB_OPTIONS) -o $(build_dir)/lib$(LIB).so $(LIB_OBJ)
+	######## Done ##############################################
+
+.PHONY: static lib_static
+static: lib_static
+lib_static: $(build_dir)/lib$(LIB).a
+$(build_dir)/lib$(LIB).a: $(LIB_OBJ)
+	############################################################
+	######## Building static library... ########################
+	#
+	ar rc $(build_dir)/lib$(LIB).a $(LIB_OBJ)
+	######## Done ##############################################
+#	ranlib $(build_dir)/lib$(LIB).a
+
+.PHONY: test_static
+test_static: static $(OBJ) $(TEST_OBJ)
+	############################################################
+	######## Test static library ###############################
+	$(LD) $(TEST_OBJ) $(build_dir)/lib$(LIB).a -o $(BIN) $(filter-out -l$(LIB),$(LDFLAGS))
+	./$(BIN)
+######## Done ##############################################
+
+.PHONY: test_shared
+test_shared: shared $(OBJ) $(TEST_OBJ)
+	############################################################
+	######## Test shared library ###############################
+	$(LD) $(TEST_OBJ) -L$(build_dir) -l$(LIB) $(filter-out $(build_dir)/lib$(LIB).a,$(LDFLAGS)) -o $(BIN)
+	LD_LIBRARY_PATH=$(build_dir) ./$(BIN)
+	######## Done ##############################################
+
+### Install #####################################################
+INSTALL          = cp
+INSTALL_EXEC     = cp
+
+DEFAULT_DESTDIR := $(HOME)/usr
+ifeq ($(DESTDIR),)
+DESTDIR         := $(DEFAULT_DESTDIR)
+endif
+
+### If installing to "/home/...", we don't need sudo
+ifneq ($(findstring $(HOME),$(DESTDIR) ),)
+    SUDO        :=
+else
+    SUDO        := sudo
+endif
+
+# Find which cluster we run on
+# For this, we iterate through the machines list: for each one of the list,
+# we check if it is part of the $(host). If any match is found, then the
+# corresponding possible_host_*_match is not empty.
+possible_host_HPCVL_match    := $(strip $(foreach possible_host, $(HPCVL_MACHINES),    $(findstring $(possible_host), $(host) ) ) )
+# Do specific stuff for different clusters
+ifneq ($(possible_host_HPCVL_match), )
+INSTALL := $(subst -D,,$(INSTALL) )
+INSTALL_EXEC := $(subst -D,,$(INSTALL_EXEC) )
+endif
+
+### Add compiler to library directory, but only if not GCC
+DESTDIR_INC      = $(DESTDIR)/include
+ifeq ($(DESTDIRCOMPILER),gcc)
+DESTDIR_LIB      = $(DESTDIR)/lib
+else
+DESTDIR_LIB     := $(DESTDIR)/lib/$(DESTDIRCOMPILER)
+endif
+
+HEADERS_NOTESTING=$(filter-out src/Version.hpp, $(filter-out $(wildcard testing/*.$(HEADEXT)), $(HEADERS) ) )
+HEADERS_NOTESTING_NOSRC=$(subst src/,,$(HEADERS_NOTESTING) )
+HEADERS_NOTESTING_NOSRC_NOMEM=$(filter-out Constants.hpp, $(HEADERS_NOTESTING_NOSRC) )
+INSTALLED_HEADERS=$(addprefix $(DESTDIR)/include/, $(HEADERS_NOTESTING_NOSRC_NOMEM) )
+###############################################################
+
+
+### Install only the build (static,shared) stated as target
+TO_INSTALL       = install_headers
+ifeq ($(filter shared, $(MAKECMDGOALS)), shared)
+TO_INSTALL      += install_shared
+endif
+ifeq ($(filter static, $(MAKECMDGOALS)), static)
+TO_INSTALL      += install_static
+endif
+.PHONY: install
+install: $(TO_INSTALL)
+
+$(DESTDIR)/include:
+	mkdir -p $(DESTDIR)/include
+$(DESTDIR_LIB):
+	mkdir -p $(DESTDIR_LIB)
+
+.PHONY: install_static
+install_static: $(DESTDIR_LIB)/lib$(LIB).a
+$(DESTDIR_LIB)/lib$(LIB).a: $(build_dir)/lib$(LIB).a $(DESTDIR_LIB)
+	############################################################
+	######## Installing static library to $(DESTDIR_LIB)... ####
+	$(SUDO) $(INSTALL) $< $@
+	############################################################
+	######## Done ##############################################
+
+.PHONY: install_shared
+install_shared: $(DESTDIR_LIB)/lib$(LIB).so
+$(DESTDIR_LIB)/lib$(LIB).so: $(build_dir)/lib$(LIB).so $(DESTDIR_LIB)
+	############################################################
+	######## Installing shared library to $(DESTDIR_LIB)... ####
+	$(SUDO) $(INSTALL_EXEC) $< $@
+	############################################################
+	######## Done ##############################################
+
+.PHONY: install_headers install_headers_print install_headers_print_done
+ifeq ($(wildcard $(INSTALLED_HEADERS)),)
+install_headers_print: $(DESTDIR)/include
+	############################################################
+	######## Installing library headers to $(DESTDIR_INC)... ###
+install_headers_print_done:
+	############################################################
+	######## Done ##############################################
+else
+install_headers_print:
+install_headers_print_done:
+endif
+install_headers: install_headers_print $(INSTALLED_HEADERS) install_headers_print_done
+$(DESTDIR)/include/%.$(HEADEXT): src/%.$(HEADEXT) $(DESTDIR)/include
+	$(SUDO) $(INSTALL) $< $@
+
+.PHONY: uninstall
+uninstall: force
+	############################################################
+	######## Removing library from $(DESTDIR_LIB)... ###
+	$(SUDO) $(RM) $(DESTDIR_LIB)/lib$(LIB)*
+	######## Removing library headers from $(DESTDIR_INC)... ###
+	$(SUDO) $(RM) -r $(INSTALLED_HEADERS)
+
+############ End of file ########################################
