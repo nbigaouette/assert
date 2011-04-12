@@ -57,7 +57,11 @@ endif
 #################################################################
 # Flags to build a shared object (library) should be the same
 # as CFLAGS plus -shared
+ifeq ($(os), Darwin)
+LIB_OPTIONS     := -dynamiclib -undefined dynamic_lookup $(CFLAGS)
+else
 LIB_OPTIONS     := -shared $(CFLAGS)
+endif
 
 # Detect if compilation for library
 ifneq ($(LIB),)
