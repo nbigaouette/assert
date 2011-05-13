@@ -44,10 +44,19 @@ ifeq ($(arch),x86_64)
     LDFLAGS     += -fPIC
 endif
 
-GCC_MAJOR    := $(shell $(CXX) -dumpversion 2>&1 | cut -d'.' -f1)
-GCC_MINOR    := $(shell $(CXX) -dumpversion 2>&1 | cut -d'.' -f2)
-ifeq ($(GCC_MINOR),5)
-    CFLAGS          += -gcc-name=/opt/gcc34/bin/gcc -gxx-name=/opt/gcc34/bin/g++
+GCC_MAJOR       := $(shell gcc -dumpversion | cut -d'.' -f1)
+GCC_MINOR       := $(shell gcc -dumpversion | cut -d'.' -f2)
+GCC_REV         := $(shell gcc -dumpversion | cut -d'.' -f3)
+ifeq ($(GCC_MAJOR).$(GCC_MINOR),4.5)
+GCC34_LOC       := /opt/gcc34
+CFLAGS += -gcc-name=$(GCC34_LOC)/bin/gcc
+CFLAGS += -gxx-name=$(GCC34_LOC)/bin/g++
+else
+ifeq ($(GCC_MAJOR).$(GCC_MINOR),4.6)
+GCC34_LOC       := /opt/gcc34
+CFLAGS += -gcc-name=$(GCC34_LOC)/bin/gcc
+CFLAGS += -gxx-name=$(GCC34_LOC)/bin/g++
+endif
 endif
 
 #################################################################
