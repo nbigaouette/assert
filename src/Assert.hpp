@@ -46,27 +46,6 @@
 //     else   // This 'else' exists to catch the user's following semicolon
 // #endif // #ifdef YDEBUG
 
-// **************************************************************
-/*
-template <class T>
-inline void Assert_isinf_isnan(T value)
-{
-    if (isinf(value))
-    {
-        std_cout << "value is inf!!! value = " << value << "\n";
-        std_cout << "Aborting\n";
-    }
-    assert(!std::isinf(value));
-
-    if (isnan(value))
-    {
-        std_cout << "value is NaN!!! value = " << value << "\n";
-        std_cout << "Aborting\n";
-    }
-    assert(!std::isnan(value));
-}
-*/
-
 #ifdef __INTEL_COMPILER
 #define Assert_isinf_isnan(value)                                   \
 {                                                                   \
