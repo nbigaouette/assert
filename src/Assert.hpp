@@ -54,9 +54,12 @@
     __pragma(warning(disable:1572))                                 \
     if ((value) != (value))                                         \
     {                                                               \
-        std_cout << "value is NaN!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-        std_cout << std::flush;                                     \
+        std_cout                                                    \
+            << "ERROR: Value is NaN!!! value = " << (value) << "\n" \
+            << "In file \"" << __FILE__ << "\", "                   \
+            << "line " << __LINE__ << "\n"                          \
+            << "Aborting\n"                                         \
+            << std::flush;                                          \
         abort();                                                    \
     }                                                               \
     assert((value) == (value));                                     \
@@ -68,9 +71,12 @@
 {                                                                   \
     if ((value) != (value))                                         \
     {                                                               \
-        std_cout << "value is NaN!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-        std_cout << std::flush;                                     \
+        std_cout                                                    \
+            << "ERROR: Value is NaN!!! value = " << (value) << "\n" \
+            << "In file \"" << __FILE__ << "\", "                   \
+            << "line " << __LINE__ << "\n"                          \
+            << "Aborting\n"                                         \
+            << std::flush;                                          \
         abort();                                                    \
     }                                                               \
     assert((value) == (value));                                     \
@@ -81,18 +87,24 @@
 {                                                                   \
     if (std::isinf((value)))                                        \
     {                                                               \
-        std_cout << "value is inf!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-        std_cout << std::flush;                                     \
+        std_cout                                                    \
+            << "ERROR: Value is inf!!! value = " << (value) << "\n" \
+            << "In file \"" << __FILE__ << "\", "                   \
+            << "line " << __LINE__ << "\n"                          \
+            << "Aborting\n"                                         \
+            << std::flush;                                          \
         abort();                                                    \
     }                                                               \
     assert(!std::isinf((value)));                                   \
                                                                     \
     if (std::isnan((value)))                                        \
     {                                                               \
-        std_cout << "value is NaN!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-        std_cout << std::flush;                                     \
+        std_cout                                                    \
+            << "ERROR: Value is NaN!!! value = " << (value) << "\n" \
+            << "In file \"" << __FILE__ << "\", "                   \
+            << "line " << __LINE__ << "\n"                          \
+            << "Aborting\n"                                         \
+            << std::flush;                                          \
         abort();                                                    \
     }                                                               \
     assert(!std::isnan((value)));                                   \
