@@ -63,27 +63,6 @@
 //     else   // This 'else' exists to catch the user's following semicolon
 // #endif // #ifdef YDEBUG
 
-// **************************************************************
-/*
-template <class T>
-inline void Assert_isinf_isnan(T value)
-{
-    if (isinf(value))
-    {
-        std_cout << "value is inf!!! value = " << value << "\n";
-        std_cout << "Aborting\n";
-    }
-    assert(!std::isinf(value));
-
-    if (isnan(value))
-    {
-        std_cout << "value is NaN!!! value = " << value << "\n";
-        std_cout << "Aborting\n";
-    }
-    assert(!std::isnan(value));
-}
-*/
-
 #ifdef __INTEL_COMPILER
 #define Assert_isinf_isnan(value)                                   \
 {                                                                   \
@@ -92,9 +71,12 @@ inline void Assert_isinf_isnan(T value)
     __pragma(warning(disable:1572))                                 \
     if ((value) != (value))                                         \
     {                                                               \
-        std_cout << "value is NaN!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-        std_cout << std::flush;                                     \
+        std_cout                                                    \
+            << "ERROR: Value is NaN!!! value = " << (value) << "\n" \
+            << "In file \"" << __FILE__ << "\", "                   \
+            << "line " << __LINE__ << "\n"                          \
+            << "Aborting\n"                                         \
+            << std::flush;                                          \
         abort();                                                    \
     }                                                               \
     assert((value) == (value));                                     \
@@ -106,9 +88,12 @@ inline void Assert_isinf_isnan(T value)
 {                                                                   \
     if ((value) != (value))                                         \
     {                                                               \
-        std_cout << "value is NaN!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-        std_cout << std::flush;                                     \
+        std_cout                                                    \
+            << "ERROR: Value is NaN!!! value = " << (value) << "\n" \
+            << "In file \"" << __FILE__ << "\", "                   \
+            << "line " << __LINE__ << "\n"                          \
+            << "Aborting\n"                                         \
+            << std::flush;                                          \
         abort();                                                    \
     }                                                               \
     assert((value) == (value));                                     \
@@ -119,17 +104,25 @@ inline void Assert_isinf_isnan(T value)
 {                                                                   \
     if (std::isinf((value)))                                        \
     {                                                               \
-        std_cout << "value is inf!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-        std_cout << std::flush;                                     \
+        std_cout                                                    \
+            << "ERROR: Value is inf!!! value = " << (value) << "\n" \
+            << "In file \"" << __FILE__ << "\", "                   \
+            << "line " << __LINE__ << "\n"                          \
+            << "Aborting\n"                                         \
+            << std::flush;                                          \
+        abort();                                                    \
     }                                                               \
     assert(!std::isinf((value)));                                   \
                                                                     \
     if (std::isnan((value)))                                        \
     {                                                               \
-        std_cout << "value is NaN!!! value = " << (value) << "\n";  \
-        std_cout << "Aborting\n";                                   \
-        std_cout << std::flush;                                     \
+        std_cout                                                    \
+            << "ERROR: Value is NaN!!! value = " << (value) << "\n" \
+            << "In file \"" << __FILE__ << "\", "                   \
+            << "line " << __LINE__ << "\n"                          \
+            << "Aborting\n"                                         \
+            << std::flush;                                          \
+        abort();                                                    \
     }                                                               \
     assert(!std::isnan((value)));                                   \
 }
