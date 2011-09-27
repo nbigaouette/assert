@@ -67,7 +67,7 @@ endif
 # MPI location
 #MPILOC          := /usr/lib/$(DESTDIRCOMPILER)/openmpi/bin/
 
-CFLAGS          += ($filter-out -O2, $(SHARCNET_CFLAGS))
+CFLAGS          += $(filter-out -O2, $(SHARCNET_CFLAGS))
 LDFLAGS         += $(SHARCNET_LDFLAGS)
 
 #CFLAGS          += -I/opt/pgi-workstation/linux86-64/7.1-6/include -I /opt/pgi-workstation/linux86-64/7.1-6/include/CC
