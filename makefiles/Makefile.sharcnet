@@ -81,13 +81,6 @@ endif
 # as CFLAGS plus -shared
 LIB_OPTIONS     := -shared $(CFLAGS)
 
-# Detect if compilation for library
-ifneq ($(LIB),)
 sharcnet: force
-pathscale: force
-pgi: force
-gcc: force
-intel: force
-dec: force
-endif
+
 ############ End of file ########################################
