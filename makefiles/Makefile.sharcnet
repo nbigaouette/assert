@@ -45,7 +45,7 @@ endif
 #################################################################
 # Call "make optimized" for optimized compilation
 ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
-    CFLAGS      := -O3 -fastsse -DNDEBUG
+    CFLAGS      := -O3 -DNDEBUG
 endif
 
 
