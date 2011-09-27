@@ -1,7 +1,6 @@
 ### Just build "full" and install
 .PHONY: f
-f:
-	$(MAKE) install $(filter-out f, $(MAKECMDGOALS) )
+f: shared static install force
 
 .PHONY: shared lib_shared
 shared: lib_shared
