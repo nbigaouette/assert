@@ -4,15 +4,17 @@
 
 CC              := cc
 CPP             := CC
-CFLAGS          := -O0 -g -DYDEBUG
 
-RPATH           := -R
-LibMath         := -lm
+SHARCNET_CFLAGS := $(CFLAGS)
+SHARCNET_LDFLAGS:= $(LDFLAGS)
+
+CFLAGS          := -O0 -g -DYDEBUG
 LDFLAGS         :=
+
+RPATH           :=
+LibMath         := -lm
 OMP_CFLAGS      := -mp
 OMP_LDFLAGS     := -mp
-
-CFLAGS          += -I$(HOME)/usr/include
 
 #################################################################
 # Call "make pathscale" to force pathscale compilation
@@ -21,6 +23,7 @@ ifneq ($(filter pathscale, $(MAKECMDGOALS) ),)
     CPP         += -psc
     CC          += -psc
     MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+    $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 #################################################################
 # Call "make pgi" to force pgi compilation
@@ -29,6 +32,7 @@ ifneq ($(filter pgi, $(MAKECMDGOALS) ),)
     CPP         += -pgi
     CC          += -pgi
     MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+    $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 #################################################################
 # Call "make intel" to force intel compilation
@@ -37,6 +41,7 @@ ifneq ($(filter intel, $(MAKECMDGOALS) ),)
     CPP         += -intel
     CC          += -intel
     MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+    $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 #################################################################
 # Call "make gcc" to force gcc compilation
@@ -45,6 +50,7 @@ ifneq ($(filter gcc, $(MAKECMDGOALS) ),)
     CPP         += -gcc
     CC          += -gcc
     MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+    $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 #################################################################
 # Call "make dec" to force dec compilation
@@ -53,15 +59,18 @@ ifneq ($(filter dec, $(MAKECMDGOALS) ),)
     CPP         += -dec
     CC          += -dec
     MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
+    $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 
 #################################################################
 # Call "make optimized" for optimized compilation
 ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
-    CFLAGS      := -O3 -fast -fastsse -DNDEBUG
+    CFLAGS      := -O3 -fastsse -DNDEBUG
 endif
 
 
+CFLAGS          += -I$(HOME)/usr/include
+CFLAGS          += -no-gcc
 
 #################################################################
 # Call "make omp" for OpenMP compilation
@@ -70,13 +79,16 @@ ifneq ($(filter omp, $(MAKECMDGOALS) ),)
 endif
 #################################################################
 # Call "make mpi" for MPI compilation
-ifneq ($(filter omp, $(MAKECMDGOALS) ),)
+ifneq ($(filter mpi, $(MAKECMDGOALS) ),)
     OMP_CFLAGS  := -mpi
 endif
 
 #################################################################
 # MPI location
-MPILOC          := /usr/lib/$(DESTDIRCOMPILER)/openmpi/bin/
+#MPILOC          := /usr/lib/$(DESTDIRCOMPILER)/openmpi/bin/
+
+CFLAGS          += ($filter-out -O2, $(SHARCNET_CFLAGS))
+LDFLAGS         += $(SHARCNET_LDFLAGS)
 
 #CFLAGS          += -I/opt/pgi-workstation/linux86-64/7.1-6/include -I /opt/pgi-workstation/linux86-64/7.1-6/include/CC
 #CFLAGS          += -I/home/nbiga058/usr/include
@@ -95,13 +107,10 @@ LIB_OPTIONS     := -shared $(CFLAGS)
 # Detect if compilation for library
 ifneq ($(LIB),)
 sharcnet: force
-else
-sharcnet: $(BIN)
-endif
-
 pathscale: force
 pgi: force
 gcc: force
 intel: force
 dec: force
+endif
 ############ End of file ########################################
