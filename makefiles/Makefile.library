@@ -1,7 +1,7 @@
 ### Just build "full" and install
 .PHONY: f full
 f: full
-full: install_shared install_static force
+full: install_shared install_static install_headers force
 
 .PHONY: shared lib_shared
 shared: lib_shared
