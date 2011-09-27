@@ -11,7 +11,7 @@ SHARCNET_LDFLAGS:= $(LDFLAGS)
 CFLAGS          := -O0 -g -DYDEBUG
 LDFLAGS         :=
 
-RPATH           :=
+RPATH           := -Wl,-R
 LibMath         := -lm
 OMP_CFLAGS      := -mp
 OMP_LDFLAGS     := -mp
