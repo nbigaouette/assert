@@ -41,17 +41,11 @@ endif
 ifneq ($(filter dec, $(MAKECMDGOALS) ),)
     $(error Don't specify a compiler when calling with 'sharcnet')
 endif
-
 #################################################################
 # Call "make optimized" for optimized compilation
 ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
     CFLAGS      := -O3 -DNDEBUG
 endif
-
-
-CFLAGS          += -I$(HOME)/usr/include
-CFLAGS          += -no-gcc
-
 #################################################################
 # Call "make omp" for OpenMP compilation
 ifneq ($(filter omp, $(MAKECMDGOALS) ),)
@@ -69,6 +63,9 @@ endif
 
 CFLAGS          += $(filter-out -O2, $(SHARCNET_CFLAGS))
 LDFLAGS         += $(SHARCNET_LDFLAGS)
+
+CFLAGS          += -I$(HOME)/usr/include
+CFLAGS          += -no-gcc
 
 # Create "position independant" code on x86_64
 ifeq ($(arch),x86_64)
