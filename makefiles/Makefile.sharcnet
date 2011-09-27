@@ -19,46 +19,26 @@ OMP_LDFLAGS     := -mp
 #################################################################
 # Call "make pathscale" to force pathscale compilation
 ifneq ($(filter pathscale, $(MAKECMDGOALS) ),)
-    DESTDIRCOMPILER := pathscale
-    CPP         += -psc
-    CC          += -psc
-    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
     $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 #################################################################
 # Call "make pgi" to force pgi compilation
 ifneq ($(filter pgi, $(MAKECMDGOALS) ),)
-    DESTDIRCOMPILER := pgi
-    CPP         += -pgi
-    CC          += -pgi
-    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
     $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 #################################################################
 # Call "make intel" to force intel compilation
 ifneq ($(filter intel, $(MAKECMDGOALS) ),)
-    DESTDIRCOMPILER := intel
-    CPP         += -intel
-    CC          += -intel
-    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
     $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 #################################################################
 # Call "make gcc" to force gcc compilation
 ifneq ($(filter gcc, $(MAKECMDGOALS) ),)
-    DESTDIRCOMPILER := gcc
-    CPP         += -gcc
-    CC          += -gcc
-    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
     $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 #################################################################
 # Call "make dec" to force dec compilation
 ifneq ($(filter dec, $(MAKECMDGOALS) ),)
-    DESTDIRCOMPILER := dec
-    CPP         += -dec
-    CC          += -dec
-    MAKECMDGOALS:=$(filter-out $(DESTDIRCOMPILER), $(MAKECMDGOALS) )
     $(error Don't specify a compiler when calling with 'sharcnet')
 endif
 
