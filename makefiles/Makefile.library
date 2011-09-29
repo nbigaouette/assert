@@ -1,7 +1,8 @@
 ### Just build "full" and install
 .PHONY: f full
 f: full
-full: install_shared install_static install_headers force
+# Header library does not requires compilation.
+full: install_headers force
 
 .PHONY: shared lib_shared
 shared: lib_shared
