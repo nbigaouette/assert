@@ -77,6 +77,7 @@
             << "line " << __LINE__ << "\n"                          \
             << "Aborting\n"                                         \
             << std::flush;                                          \
+        std_cout.Flush();                                           \
         abort();                                                    \
     }                                                               \
     assert((value) == (value));                                     \
@@ -94,6 +95,7 @@
             << "line " << __LINE__ << "\n"                          \
             << "Aborting\n"                                         \
             << std::flush;                                          \
+        std_cout.Flush();                                           \
         abort();                                                    \
     }                                                               \
     assert((value) == (value));                                     \
@@ -110,6 +112,7 @@
             << "line " << __LINE__ << "\n"                          \
             << "Aborting\n"                                         \
             << std::flush;                                          \
+        std_cout.Flush();                                           \
         abort();                                                    \
     }                                                               \
     assert(!std::isinf((value)));                                   \
@@ -122,6 +125,7 @@
             << "line " << __LINE__ << "\n"                          \
             << "Aborting\n"                                         \
             << std::flush;                                          \
+        std_cout.Flush();                                           \
         abort();                                                    \
     }                                                               \
     assert(!std::isnan((value)));                                   \
