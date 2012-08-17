@@ -11,6 +11,31 @@ CC               = $(COMP_LOC)gcc
 CPP              = $(COMP_LOC)g++
 CFLAGS           = -O0 -g -DYDEBUG -Wno-write-strings
 CFLAGS          += -Wall -Wfatal-errors
+ifeq ($(LANGUAGE),CPP)
+CFLAGS          += -std=c++98
+else
+CFLAGS          += -std=c90
+endif
+CFLAGS          += -pedantic
+CFLAGS          += -Wall -Wextra
+CFLAGS          += -Wformat=2 -Wno-format-extra-args -Wformat-security -Wformat-nonliteral
+# CFLAGS          += -Wuninitialized
+CFLAGS          += -Winit-self
+CFLAGS          += -Wmissing-include-dirs -Wfloat-equal -Wshadow -Wunsafe-loop-optimizations -Wconversion -Winline
+ifneq ($(os), Darwin)
+CFLAGS          += -Wlogical-op
+endif
+# CFLAGS          += -Wpadded
+# CFLAGS          += -Wunreachable-code
+# CFLAGS          += -Weffc++
+CFLAGS          += -Wno-unused-parameter # Disable: "warning: unused parameter [...]"
+CFLAGS          += -Wno-unknown-pragmas
+CFLAGS          += -Werror=return-type
+# See http://www.dwheeler.com/secure-programs/Secure-Programs-HOWTO/c-cpp.html
+# CFLAGS          += -Wpointer-arith -O2
+ifeq (C, $(LANGUAGE))
+CFLAGS          += -Wstrict-prototypes
+endif
 
 RPATH           := -Wl,-rpath,
 
@@ -26,6 +51,18 @@ ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
     # Needed for fast dSFMT pseudo-random number generator
     CFLAGS      += -msse2 -DHAVE_SSE2
     CFLAGS      += -ftree-vectorizer-verbose=1
+    # Link-time optimization. Needs GCC v4.5.1 and up
+    GCC_GT_451  := $(shell [ $(GCC_MAJOR) -gt 4 -o \( $(GCC_MAJOR) -eq 4 -a $(GCC_MINOR) -ge 5 -a $(GCC_REV) -ge 1 \) ] && echo true )
+    ifeq ($(GCC_GT_451),true)
+        # Even for gcc > 4.5.1, LTO might not have been enabled
+        ifeq ($(shell LANG=C gcc -v 2>&1 | grep "Configured with" | sed "s|.*--\([a-z]*\)-lto.*|\1|g"),enable)
+            CFLAGS  += -flto
+            LDFLAGS += -flto
+        endif
+    endif
+    ifneq ($(os), Darwin)
+        CFLAGS  += -march=native
+    endif
 endif
 #################################################################
 # Call "make prof" for profiling
