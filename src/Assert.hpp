@@ -72,7 +72,7 @@
     if ((value) != (value))                                         \
     {                                                               \
         std_cout                                                    \
-            << "ERROR: Value is NaN!!! value = " << (value) << "\n" \
+            << "ERROR: The variable " << QUOTEME(value) << " is NaN!!! (" << (value) << ")\n" \
             << "In file \"" << __FILE__ << "\", "                   \
             << "line " << __LINE__ << "\n"                          \
             << "Aborting\n"                                         \
@@ -90,7 +90,7 @@
     if ((value) != (value))                                         \
     {                                                               \
         std_cout                                                    \
-            << "ERROR: Value is NaN!!! value = " << (value) << "\n" \
+            << "ERROR: The variable " << QUOTEME(value) << " is NaN!!! (" << (value) << ")\n" \
             << "In file \"" << __FILE__ << "\", "                   \
             << "line " << __LINE__ << "\n"                          \
             << "Aborting\n"                                         \
@@ -107,7 +107,7 @@
     if (std::isinf((value)))                                        \
     {                                                               \
         std_cout                                                    \
-            << "ERROR: Value is inf!!! value = " << (value) << "\n" \
+            << "ERROR: The variable " << QUOTEME(value) << " is infinite!!! (" << (value) << ")\n" \
             << "In file \"" << __FILE__ << "\", "                   \
             << "line " << __LINE__ << "\n"                          \
             << "Aborting\n"                                         \
@@ -120,7 +120,7 @@
     if (std::isnan((value)))                                        \
     {                                                               \
         std_cout                                                    \
-            << "ERROR: Value is NaN!!! value = " << (value) << "\n" \
+            << "ERROR: The variable " << QUOTEME(value) << " is NaN!!! (" << (value) << ")\n" \
             << "In file \"" << __FILE__ << "\", "                   \
             << "line " << __LINE__ << "\n"                          \
             << "Aborting\n"                                         \
